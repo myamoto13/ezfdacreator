@@ -1,4 +1,4 @@
-package com.extia.io.excel.data;
+package com.extia.fdaprocessor.data;
 
 public class Jaretiere {
 

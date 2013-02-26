@@ -1,43 +1,52 @@
-package com.extia.io.excel;
+package com.extia.fdaprocessor.io;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.util.IOUtils;
 
-import com.extia.io.excel.data.Cable;
-import com.extia.io.excel.data.FicheDAduction;
-import com.extia.io.excel.data.Jaretiere;
+import com.extia.fdaprocessor.data.Cable;
+import com.extia.fdaprocessor.data.FicheDAduction;
+import com.extia.fdaprocessor.data.Jaretiere;
 
-public class XLSXIO {
+public class FicheDAductionIO {
 
-	private FicheDAduction readFiche(File fdaFile) throws InvalidFormatException, IOException{
+	public FicheDAduction readFiche(File fdaFile) throws InvalidFormatException, IOException{
 		FicheDAduction result = null;
-		
+
 		Workbook workbook = WorkbookFactory.create(fdaFile);
-		
+
 		if(workbook != null){
-		
+
 			Sheet sheet = workbook.getSheetAt(0);
-			
+
 			if(sheet != null){
-				
+
 				result = new FicheDAduction();
-				
+
 				result.setIdentifiantSite(FilenameUtils.removeExtension(fdaFile.getName()));
 				result.setDescription(getCellValue(0, 0, sheet));
 				result.setDescDerivation(getCellValue(8, 5, sheet));
@@ -142,10 +151,14 @@ public class XLSXIO {
 		return result;
 	}
 
-	private void writeFiche(FicheDAduction fiche, Sheet sheet) {
+	public void writeFiche(FicheDAduction fiche, Sheet sheet) {
 		if(fiche != null && sheet != null){
+
 			setCellValue(fiche.getDescription(), 0, 0, sheet);
+
+			setCellValue(fiche.getDescDerivation(), 8, 11, sheet);
 			setCellValue(fiche.getDescDerivation(), 4, 16, sheet);
+
 			setCellValue(fiche.getIdentifiantSite(), 8, 21, sheet);
 
 			int indexRowIntituleJaretNRO = -1;
@@ -300,24 +313,69 @@ public class XLSXIO {
 		return result;
 	}
 
-	public static void main(String[] args) throws Exception, FileNotFoundException, IOException {
-		File fdaFile = new File("C:/Users/Michael Cortes/Desktop/FDA/FI-06088-002Y.xlsx");
+	public void addImage(HSSFSheet sheet, File imageFile, int rowIndex) throws IOException {
+		//create a new workbook
+		if(sheet != null){
+			//add picture data to this workbook.
+			InputStream is = new FileInputStream(imageFile);
 
-		XLSXIO xlsxIO = new XLSXIO();
+			byte[] bytes = IOUtils.toByteArray(is);
+			int pictureIdx = sheet.getWorkbook().addPicture(bytes, Workbook.PICTURE_TYPE_JPEG);
+			is.close();
 
-		FicheDAduction fiche = xlsxIO.readFiche(fdaFile);
+			CreationHelper helper = sheet.getWorkbook().getCreationHelper();
 
-		System.out.println(fiche);
 
-		Workbook workbookTemplate = WorkbookFactory.create(new FileInputStream("C:/Users/Michael Cortes/Desktop/FDA/template.xls"));
-		Sheet sheetTemplate = workbookTemplate.getSheetAt(0);
-		for (int indexRow = 0; indexRow < sheetTemplate.getLastRowNum(); indexRow++) {
-			Row row = sheetTemplate.getRow(indexRow);
+			// Create the drawing patriarch. This is the top level container for all shapes. 
+			if(sheet.getDrawingPatriarch() == null){
+				sheet.createDrawingPatriarch();
+			}
+
+			Drawing drawing = sheet.getDrawingPatriarch();
+
+			//add a picture shape
+			ClientAnchor anchor = helper.createClientAnchor();
+			//set top-left corner of the picture,
+			//subsequent call of Picture#resize() will operate relative to it
+			anchor.setCol1(0);
+			anchor.setRow1(rowIndex);
+
+			setCellValue("" + rowIndex, rowIndex, 0, sheet);
+
+
+			is = new FileInputStream(imageFile);
+			BufferedImage img = ImageIO.read(is);
+			is.close();
+			int height = img.getHeight();
+
+			HSSFRow row = sheet.getRow(rowIndex);
+			if(row == null){
+				row = sheet.createRow(rowIndex);
+			}
+			row.setHeightInPoints(1 + height * 0.75F);
+
+
+			Picture pict = drawing.createPicture(anchor, pictureIdx);
+
+			//auto-size picture relative to its top-left corner
+			pict.resize();
+
+			System.out.println(imageFile);
+			System.out.println("x : " + pict.getPreferredSize().getDx1() + "  " +  pict.getPreferredSize().getDx2());
+			System.out.println("y : " + pict.getPreferredSize().getDy1() + "  " +  pict.getPreferredSize().getDy2());
+
+
+		}
+	}
+
+	public void displayWorkbook(Sheet sheet) {
+		for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
+			Row row = sheet.getRow(indexRow);
 			if(row != null){
 				for (int indexCol = 0; indexCol < row.getLastCellNum(); indexCol++) {
 					Cell cell = row.getCell(indexCol);
 					if(cell != null){
-						String cellVal = xlsxIO.getCellValue(cell);
+						String cellVal = getCellValue(cell);
 
 						if(cellVal != null && !"".equals(cellVal)){
 							System.out.println("(" + indexRow + ", " + indexCol + ") => " + cellVal);
@@ -325,15 +383,7 @@ public class XLSXIO {
 					}
 				}
 			}
-		}
-
-		xlsxIO.writeFiche(fiche, sheetTemplate);
-
-		FileOutputStream newExcelFile = new FileOutputStream("C:/Users/Michael Cortes/Desktop/FDA/result.xls");
-
-		workbookTemplate.write(newExcelFile);
-
-		newExcelFile.close(); 
+		}		
 	}
-
 }
+
