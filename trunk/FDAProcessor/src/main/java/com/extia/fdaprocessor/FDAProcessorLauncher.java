@@ -1,62 +1,68 @@
 package com.extia.fdaprocessor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Point;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import com.extia.fdaprocessor.data.FicheDAduction;
-import com.extia.fdaprocessor.io.FicheDAductionIO;
+import org.apache.log4j.Logger;
+
+import com.extia.fdaprocessor.ui.fdaprocessor.GUIFDAProcessor;
 
 public class FDAProcessorLauncher {
 
-	public static void main(String[] args) throws Exception, FileNotFoundException, IOException {
-		FicheDAductionIO ficheDAductionIO = new FicheDAductionIO();
+	static Logger logger = Logger.getLogger(FDAProcessorLauncher.class);
+	
+
+	public void launch(String configFilePath) throws Exception{
 		
-		File fdaFile = new File("C:/Users/Michael Cortes/Desktop/FDA/FI-06088-002Y.xlsx");
-
-		FicheDAduction fiche = ficheDAductionIO.readFiche(fdaFile);
-
-		System.out.println(fiche);
-
+		GUIFDAProcessor guiFDAProcessor = new GUIFDAProcessor();
 		
-		Workbook workbookTemplate = WorkbookFactory.create(new FileInputStream("C:/Users/Michael Cortes/Desktop/FDA/template.xls"));
-		Sheet sheetTemplate = workbookTemplate.getSheetAt(0);
-		
-		ficheDAductionIO.displayWorkbook(sheetTemplate);
-
-		ficheDAductionIO.writeFiche(fiche, sheetTemplate);
-
-		FileOutputStream newExcelFile = new FileOutputStream("C:/Users/Michael Cortes/Desktop/FDA/result.xls");
-
-		if(workbookTemplate instanceof HSSFWorkbook){
-			File fileFolder = new File("C:/Users/Michael Cortes/Desktop/FDA");
-			File[] imageFileList = fileFolder.listFiles(new FilenameFilter() {
-				public boolean accept(File file, String fileName) {
-					boolean result = false;
-					if(fileName != null){
-						String lowerCaseFileName = fileName.toLowerCase();
-						result = lowerCaseFileName != null && lowerCaseFileName.endsWith(".png") || lowerCaseFileName.endsWith(".jpg") || lowerCaseFileName.endsWith(".gif");
-					}
-					return result;
-				}
-			});
-
-			int rowIndex = 0;
-			for (File imgFile : imageFileList) {
-				ficheDAductionIO.addImage(((HSSFWorkbook)workbookTemplate).getSheetAt(1), imgFile, rowIndex++);
+		JPanel contentPane = new JPanel(new GridBagLayout()){
+			protected void paintComponent(Graphics g) {
+				Color color1 = new Color(231, 248, 252);
+				Color color2 = new Color(17, 156, 190);
+				
+				GradientPaint gradient = new GradientPaint(new Point(0, 0), color1, new Point(0, getHeight()), color2);
+				
+				((Graphics2D)g).setPaint(gradient);
+				((Graphics2D)g).fill(getBounds());
 			}
-
+		};
+		
+		contentPane.add(guiFDAProcessor.getUI(), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		
+		JFrame frame = new JFrame();
+		frame.setSize(new Dimension(800, 600));
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().add(contentPane);
+		frame.setVisible(true);
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		try {
+			String configFilePath = null;
+			if(args != null){
+				if(args.length > 0){
+					configFilePath = args[0];
+				}
+			}
+			
+			FDAProcessorLauncher launcher = new FDAProcessorLauncher();
+			launcher.launch(configFilePath);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 		}
-		workbookTemplate.write(newExcelFile);
-		newExcelFile.close();
 	}
 
 }
