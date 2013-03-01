@@ -1,11 +1,11 @@
-package com.extia.fdaprocessor;
+package com.extia.fdaprocessor.excel;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -13,33 +13,53 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import com.extia.fdaprocessor.data.FDAProcessUserSettings;
 import com.extia.fdaprocessor.data.FicheDAduction;
 import com.extia.fdaprocessor.io.FicheDAductionIO;
 
 public class FDAProcessor {
+	
+	private List<FDAProcessProgressListener> fDAProcessProgressListenerList;
+	private FDAProcessUserSettings settings;
+	
+	public FDAProcessor() {
+		fDAProcessProgressListenerList = new ArrayList<FDAProcessor.FDAProcessProgressListener>();
+	}
+	
+	public boolean addFDAProcessProgressListener(FDAProcessProgressListener fDAProcessProgressListener){
+		return fDAProcessProgressListenerList.add(fDAProcessProgressListener);
+	}
 
-	public void processFdas(File srcDir, File destDir) throws InvalidFormatException, IOException{
-		if(srcDir != null && destDir != null){
+	public boolean removeFDAProcessProgressListener(FDAProcessProgressListener fDAProcessProgressListener){
+		return fDAProcessProgressListenerList.remove(fDAProcessProgressListener);
+	}
+
+	public void processFdas() throws InvalidFormatException, IOException{
+		if(getSrcDir() != null && getDestDir() != null){
 			FileFilter xLSXFileFilter = new FileFilter(){
-
 				public boolean accept(File file) {
 					return file != null && file.getName().endsWith("xlsx");
 				}
-				
 			};
 			
 			FicheDAductionIO ficheDAductionIO = new FicheDAductionIO();
 			
-			
-
 //			ficheDAductionIO.displayWorkbook(sheetTemplate);
-
-			for (File srcFile : srcDir.listFiles(xLSXFileFilter)) {
-				InputStream is =  this.getClass().getResourceAsStream("/template.xls");
-				Workbook workbookTemplate = WorkbookFactory.create(is);
-				Sheet sheetTemplate = workbookTemplate.getSheetAt(0);
+			
+			
+			int fileIndex = 0;
+			fireProgressUpdated(0);
+			
+			File srcDir = getSrcDir();
+			File destDir = getDestDir();
+			
+			File[] srcFileList = srcDir.listFiles(xLSXFileFilter);
+			
+			for (File srcFile : srcFileList) {
+				
 				
 				FicheDAduction fiche = ficheDAductionIO.readFiche(srcFile);
+				
 				if(fiche != null){
 					//TODO build imageList
 					List<File> imageList = null;
@@ -55,18 +75,25 @@ public class FDAProcessor {
 //						}
 //					});
 					
+					InputStream is =  getClass().getResourceAsStream("/template.xls");
+					Workbook workbookTemplate = WorkbookFactory.create(is);
+					Sheet sheetTemplate = workbookTemplate.getSheetAt(0);
+					
 					ficheDAductionIO.writeFiche(fiche, sheetTemplate, imageList);
 
 					FileOutputStream fileOutputStream = new FileOutputStream(new File(destDir, fiche.getIdentifiantSite() + ".xls"));
 					workbookTemplate.write(fileOutputStream);
 					fileOutputStream.close();
 				}
+				
+				int progress = Math.round(((float)(fileIndex ++) / (float)srcFileList.length) * 100);
+				
+				fireProgressUpdated(progress);
 			}
+			
+			fireProgressUpdated(100);
 		}
 		
-
-		
-
 
 //		Workbook workbookImageDir = WorkbookFactory.create(new FileInputStream("C:/Users/Michael Cortes/Desktop/FDA/photoRepository.xlsx"));
 //		List<? extends PictureData> lst = ((XSSFWorkbook)workbookImageDir).getAllPictures();
@@ -95,4 +122,40 @@ public class FDAProcessor {
 //			System.out.println(bImageFromConvert.getWidth() + ", " + bImageFromConvert.getHeight());
 //		}
 	}
+	
+
+	private void fireProgressUpdated(int progress){
+		for (FDAProcessProgressListener fDAProcessProgressListener : fDAProcessProgressListenerList) {
+			fDAProcessProgressListener.progressUpdated(progress);
+		}
+	}
+	
+	public interface FDAProcessProgressListener{
+		void progressUpdated(int progress);
+	}
+
+	public File getSrcDir() {
+		return getSettings().getSrcDir() != null ? new File(getSettings().getSrcDir()) : null;
+	}
+
+	public void setSrcDir(File srcDir) {
+		getSettings().setSrcDir(srcDir != null ? srcDir.getAbsolutePath() : null);
+	}
+
+	public File getDestDir() {
+		return getSettings().getDestDir() != null ? new File(getSettings().getDestDir()) : null;
+	}
+
+	public void setDestDir(File destDir) {
+		getSettings().setSrcDir(destDir != null ? destDir.getAbsolutePath() : null);
+	}
+
+	public void setSettings(FDAProcessUserSettings settings) {
+		this.settings = settings;
+	}
+
+	public FDAProcessUserSettings getSettings() {
+		return settings;
+	}
+	
 }

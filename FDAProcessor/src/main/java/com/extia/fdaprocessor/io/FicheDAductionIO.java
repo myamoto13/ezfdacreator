@@ -1,35 +1,21 @@
 package com.extia.fdaprocessor.io;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.util.IOUtils;
 
 import com.extia.fdaprocessor.data.Cable;
 import com.extia.fdaprocessor.data.FicheDAduction;
@@ -37,12 +23,10 @@ import com.extia.fdaprocessor.data.Jaretiere;
 
 public class FicheDAductionIO {
 
-	public FicheDAduction readFiche(File fdaFile)
-			throws InvalidFormatException, IOException {
+	public FicheDAduction readFiche(File fdaFile) throws InvalidFormatException, IOException {
 		FicheDAduction result = null;
 
 		Workbook workbook = WorkbookFactory.create(fdaFile);
-
 		if (workbook != null) {
 
 			Sheet sheet = workbook.getSheetAt(0);
@@ -51,8 +35,7 @@ public class FicheDAductionIO {
 
 				result = new FicheDAduction();
 
-				result.setIdentifiantSite(FilenameUtils.removeExtension(fdaFile
-						.getName()));
+				result.setIdentifiantSite(FilenameUtils.removeExtension(fdaFile.getName()));
 				result.setDescription(getCellValue(0, 0, sheet));
 				result.setDescDerivation(getCellValue(8, 5, sheet));
 
@@ -117,8 +100,7 @@ public class FicheDAductionIO {
 					}
 				}
 
-				if (indexRowJaretBPI >= 0
-						&& indexRowJaretBPI + 2 <= sheet.getLastRowNum()) {
+				if (indexRowJaretBPI >= 0 && indexRowJaretBPI + 2 <= sheet.getLastRowNum()) {
 					int maxRowJaretBPI = indexRowJaretNRO >= 0 ? indexRowJaretNRO - 1
 							: sheet.getLastRowNum();
 					for (int indexRow = indexRowJaretBPI + 2; indexRow < maxRowJaretBPI; indexRow++) {
@@ -129,8 +111,7 @@ public class FicheDAductionIO {
 						String etat = getCellValue(indexRow, 11, sheet);
 						String commentaires = getCellValue(indexRow, 12, sheet);
 
-						if (!isValid(new String[] { tenant, aboutissant, ref,
-								etat, commentaires })) {
+						if (!isValid(new String[] { tenant, aboutissant, ref, etat, commentaires })) {
 							break;
 						}
 
@@ -180,8 +161,7 @@ public class FicheDAductionIO {
 
 			int indexRowIntituleJaretNRO = -1;
 			for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
-				if ("JARRETIERES A POSER au NRO".equals(getCellValue(indexRow,
-						0, sheet))) {
+				if ("JARRETIERES A POSER au NRO".equals(getCellValue(indexRow, 0, sheet))) {
 					indexRowIntituleJaretNRO = indexRow;
 					break;
 				}
@@ -189,8 +169,7 @@ public class FicheDAductionIO {
 
 			int indexRowIntituleJaretBPI = -1;
 			for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
-				if ("JARRETIERES A POSER au BPI".equals(getCellValue(indexRow,
-						0, sheet))) {
+				if ("JARRETIERES A POSER au BPI".equals(getCellValue(indexRow, 0, sheet))) {
 					indexRowIntituleJaretBPI = indexRow;
 					break;
 				}
@@ -213,8 +192,7 @@ public class FicheDAductionIO {
 				setCellValue(cable.getCouleurFibre2(), indexCable, 17, sheet);
 				setCellValue(cable.getFibre2(), indexCable, 18, sheet);
 				setCellValue(cable.getCouleurTube2(), indexCable, 19, sheet);
-				setCellValue(cable.getCableRaccordement(), indexCable, 20,
-						sheet);
+				setCellValue(cable.getCableRaccordement(), indexCable, 20, sheet);
 				indexCable++;
 			}
 
@@ -223,58 +201,45 @@ public class FicheDAductionIO {
 				int indexRowJaretBPI = indexRowIntituleJaretBPI + 2;
 				for (Jaretiere jaretiere : fiche.getJaretiereBPIList()) {
 
-					setCellValue(jaretiere.getTenant(), indexRowJaretBPI, 0,
-							sheet);
-					setCellValue(jaretiere.getAboutissant(), indexRowJaretBPI,
-							6, sheet);
-					setCellValue(jaretiere.getRef(), indexRowJaretBPI, 14,
-							sheet);
-					setCellValue(jaretiere.getEtat(), indexRowJaretBPI, 16,
-							sheet);
-					setCellValue(jaretiere.getCommentaires(), indexRowJaretBPI,
-							17, sheet);
+					setCellValue(jaretiere.getTenant(), indexRowJaretBPI, 0, sheet);
+					setCellValue(jaretiere.getAboutissant(), indexRowJaretBPI, 6, sheet);
+					setCellValue(jaretiere.getRef(), indexRowJaretBPI, 14, sheet);
+					setCellValue(jaretiere.getEtat(), indexRowJaretBPI, 16, sheet);
+					setCellValue(jaretiere.getCommentaires(), indexRowJaretBPI, 17, sheet);
 
 					indexRowJaretBPI++;
 				}
 
 			}
 
-			if (indexRowIntituleJaretNRO >= 0
-					&& indexRowIntituleJaretNRO + 2 <= sheet.getLastRowNum()) {
+			if (indexRowIntituleJaretNRO >= 0 && indexRowIntituleJaretNRO + 2 <= sheet.getLastRowNum()) {
 				int indexRowJaretNRO = indexRowIntituleJaretNRO + 2;
 				for (Jaretiere jaretiere : fiche.getJaretiereNROList()) {
 
-					setCellValue(jaretiere.getTenant(), indexRowJaretNRO, 0,
-							sheet);
-					setCellValue(jaretiere.getAboutissant(), indexRowJaretNRO,
-							6, sheet);
-					setCellValue(jaretiere.getRef(), indexRowJaretNRO, 14,
-							sheet);
-					setCellValue(jaretiere.getEtat(), indexRowJaretNRO, 16,
-							sheet);
-					setCellValue(jaretiere.getCommentaires(), indexRowJaretNRO,
-							17, sheet);
+					setCellValue(jaretiere.getTenant(), indexRowJaretNRO, 0, sheet);
+					setCellValue(jaretiere.getAboutissant(), indexRowJaretNRO, 6, sheet);
+					setCellValue(jaretiere.getRef(), indexRowJaretNRO, 14, sheet);
+					setCellValue(jaretiere.getEtat(), indexRowJaretNRO, 16, sheet);
+					setCellValue(jaretiere.getCommentaires(), indexRowJaretNRO, 17, sheet);
 
 					indexRowJaretNRO++;
 				}
 			}
 
-			if (imageFileList != null) {
-				Workbook workbook = sheet.getWorkbook();
-				if (workbook instanceof HSSFWorkbook) {
-					int rowIndex = 0;
-					for (File imgFile : imageFileList) {
-						addImage(((HSSFWorkbook) workbook).getSheetAt(1),
-								imgFile, rowIndex++);
-					}
-
-				}
-			}
+//			if (imageFileList != null) {
+//				Workbook workbook = sheet.getWorkbook();
+//				if (workbook instanceof HSSFWorkbook) {
+//					int rowIndex = 0;
+//					for (File imgFile : imageFileList) {
+//						addImage(((HSSFWorkbook) workbook).getSheetAt(1), imgFile, rowIndex++);
+//					}
+//
+//				}
+//			}
 		}
 	}
 
-	private Jaretiere createJaretiere(String tenant, String aboutissant,
-			String ref, String etat, String commentaires) {
+	private Jaretiere createJaretiere(String tenant, String aboutissant, String ref, String etat, String commentaires) {
 		Jaretiere result = new Jaretiere();
 		result.setTenant(tenant);
 		result.setAboutissant(aboutissant);
@@ -298,13 +263,10 @@ public class FicheDAductionIO {
 		return result;
 	}
 
-	private void setCellValue(String value, int rowIndex, int colIndex,
-			Sheet sheet) {
+	private void setCellValue(String value, int rowIndex, int colIndex, Sheet sheet) {
 		Cell cell = getCell(rowIndex, colIndex, sheet);
 		if (cell != null) {
 			cell.setCellValue(value);
-			System.out
-					.println(value + "  " + cell.getCellStyle().getWrapText());
 		}
 	}
 
@@ -327,8 +289,7 @@ public class FicheDAductionIO {
 		String result = null;
 		if (cell != null) {
 			// TODO : check for nullpointers
-			FormulaEvaluator formulaEv = cell.getSheet().getWorkbook()
-					.getCreationHelper().createFormulaEvaluator();
+			FormulaEvaluator formulaEv = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
 
 			CellValue cValue = formulaEv.evaluate(cell);
 			switch (cell.getCellType()) {
@@ -363,78 +324,77 @@ public class FicheDAductionIO {
 		return result;
 	}
 
-	public void addImage(HSSFSheet sheet, File imageFile, int rowIndex)
-			throws IOException {
-		// create a new workbook
-		if (sheet != null) {
-			// add picture data to this workbook.
-			InputStream is = new FileInputStream(imageFile);
+//	public void addImage(HSSFSheet sheet, File imageFile, int rowIndex) throws IOException {
+//		// create a new workbook
+//		if (sheet != null) {
+//			// add picture data to this workbook.
+//			InputStream is = new FileInputStream(imageFile);
+//
+//			byte[] bytes = IOUtils.toByteArray(is);
+//			int pictureIdx = sheet.getWorkbook().addPicture(bytes,
+//					Workbook.PICTURE_TYPE_JPEG);
+//			is.close();
+//
+//			CreationHelper helper = sheet.getWorkbook().getCreationHelper();
+//
+//			// Create the drawing patriarch. This is the top level container for
+//			// all shapes.
+//			if (sheet.getDrawingPatriarch() == null) {
+//				sheet.createDrawingPatriarch();
+//			}
+//
+//			Drawing drawing = sheet.getDrawingPatriarch();
+//
+//			// add a picture shape
+//			ClientAnchor anchor = helper.createClientAnchor();
+//			// set top-left corner of the picture,
+//			// subsequent call of Picture#resize() will operate relative to it
+//			anchor.setCol1(0);
+//			anchor.setRow1(rowIndex);
+//
+//			setCellValue("" + rowIndex, rowIndex, 0, sheet);
+//
+//			is = new FileInputStream(imageFile);
+//			BufferedImage img = ImageIO.read(is);
+//			is.close();
+//			int height = img.getHeight();
+//
+//			HSSFRow row = sheet.getRow(rowIndex);
+//			if (row == null) {
+//				row = sheet.createRow(rowIndex);
+//			}
+//			row.setHeightInPoints(1 + height * 0.75F);
+//
+//			Picture pict = drawing.createPicture(anchor, pictureIdx);
+//
+//			// auto-size picture relative to its top-left corner
+//			pict.resize();
+//
+//			System.out.println(imageFile);
+//			System.out.println("x : " + pict.getPreferredSize().getDx1() + "  "
+//					+ pict.getPreferredSize().getDx2());
+//			System.out.println("y : " + pict.getPreferredSize().getDy1() + "  "
+//					+ pict.getPreferredSize().getDy2());
+//
+//		}
+//	}
 
-			byte[] bytes = IOUtils.toByteArray(is);
-			int pictureIdx = sheet.getWorkbook().addPicture(bytes,
-					Workbook.PICTURE_TYPE_JPEG);
-			is.close();
-
-			CreationHelper helper = sheet.getWorkbook().getCreationHelper();
-
-			// Create the drawing patriarch. This is the top level container for
-			// all shapes.
-			if (sheet.getDrawingPatriarch() == null) {
-				sheet.createDrawingPatriarch();
-			}
-
-			Drawing drawing = sheet.getDrawingPatriarch();
-
-			// add a picture shape
-			ClientAnchor anchor = helper.createClientAnchor();
-			// set top-left corner of the picture,
-			// subsequent call of Picture#resize() will operate relative to it
-			anchor.setCol1(0);
-			anchor.setRow1(rowIndex);
-
-			setCellValue("" + rowIndex, rowIndex, 0, sheet);
-
-			is = new FileInputStream(imageFile);
-			BufferedImage img = ImageIO.read(is);
-			is.close();
-			int height = img.getHeight();
-
-			HSSFRow row = sheet.getRow(rowIndex);
-			if (row == null) {
-				row = sheet.createRow(rowIndex);
-			}
-			row.setHeightInPoints(1 + height * 0.75F);
-
-			Picture pict = drawing.createPicture(anchor, pictureIdx);
-
-			// auto-size picture relative to its top-left corner
-			pict.resize();
-
-			System.out.println(imageFile);
-			System.out.println("x : " + pict.getPreferredSize().getDx1() + "  "
-					+ pict.getPreferredSize().getDx2());
-			System.out.println("y : " + pict.getPreferredSize().getDy1() + "  "
-					+ pict.getPreferredSize().getDy2());
-
-		}
-	}
-
-	public void displayWorkbook(Sheet sheet) {
-		for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
-			Row row = sheet.getRow(indexRow);
-			if (row != null) {
-				for (int indexCol = 0; indexCol < row.getLastCellNum(); indexCol++) {
-					Cell cell = row.getCell(indexCol);
-					if (cell != null) {
-						String cellVal = getCellValue(cell);
-
-						if (cellVal != null && !"".equals(cellVal)) {
-							System.out.println("(" + indexRow + ", " + indexCol
-									+ ") => " + cellVal);
-						}
-					}
-				}
-			}
-		}
-	}
+//	private void displayWorkbook(Sheet sheet) {
+//		for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
+//			Row row = sheet.getRow(indexRow);
+//			if (row != null) {
+//				for (int indexCol = 0; indexCol < row.getLastCellNum(); indexCol++) {
+//					Cell cell = row.getCell(indexCol);
+//					if (cell != null) {
+//						String cellVal = getCellValue(cell);
+//
+//						if (cellVal != null && !"".equals(cellVal)) {
+//							System.out.println("(" + indexRow + ", " + indexCol
+//									+ ") => " + cellVal);
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
 }

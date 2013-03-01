@@ -1,6 +1,5 @@
 package com.extia.fdaprocessor.ui.fdaprocessor;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -9,16 +8,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileFilter;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -36,6 +34,8 @@ public class VFDAProcessor implements MViadeoScraperListener {
 	private JButton destDirChooseBtn;
 	private JFileChooser destDirFileChooser;
 
+	private JProgressBar progressBar;
+	
 	private JButton processFDABtn;
 	
 	private List<VFDAProcessorListener> vueListenerList;
@@ -43,6 +43,10 @@ public class VFDAProcessor implements MViadeoScraperListener {
 	private JTextField srcDirTxtFld;
 	private JTextField destDirTxtFld;
 
+	private JPanel progressPnl;
+	
+	private JPanel ctrlPnl;
+	
 	public VFDAProcessor() {
 		vueListenerList = new ArrayList<VFDAProcessorListener>();
 	}
@@ -69,6 +73,7 @@ public class VFDAProcessor implements MViadeoScraperListener {
 						int returnVal = fc.showOpenDialog(getUi());
 						if (returnVal == JFileChooser.APPROVE_OPTION) {
 							srcDirTxtFld.setText(fc.getSelectedFile().getAbsolutePath());
+							fireSrcDirUpdated(fc.getSelectedFile());
 						}
 					}else if(e.getSource() == destDirChooseBtn){
 						JFileChooser fc = getDestDirFileChooser();
@@ -76,6 +81,7 @@ public class VFDAProcessor implements MViadeoScraperListener {
 						int returnVal = fc.showOpenDialog(getUi());
 						if (returnVal == JFileChooser.APPROVE_OPTION) {
 							destDirTxtFld.setText(fc.getSelectedFile().getAbsolutePath());
+							fireDestDirUpdated(fc.getSelectedFile());
 						}
 					}else if(e.getSource() == processFDABtn){
 						fireProcessFDA();
@@ -84,6 +90,7 @@ public class VFDAProcessor implements MViadeoScraperListener {
 					ex.printStackTrace();
 				}
 			}
+
 		};
 	}
 	
@@ -103,74 +110,105 @@ public class VFDAProcessor implements MViadeoScraperListener {
 		return srcDirFileChooser;
 	}
 
-	private FileFilter getDirectoryFilter() {
-		return  new FileFilter() {
-
-			public String getDescription() {
-				return "répertoire";
-			}
-
-			public boolean accept(File file) {
-				return file != null && file.isDirectory();
-			}
-		};
-	}
-
 	public JPanel getUi() throws IOException {
 		if(ui == null){
 			ActionListener al = getActionListener();
 			
-			processFDABtn = new JButton("Générer FDA");
+			processFDABtn = new JButton(new ImageIcon(getClass().getResource("/icones/media_play_green.png")));
+			processFDABtn.setToolTipText("Générer FDA");
 			processFDABtn.addActionListener(al);
 			
-			srcDirChooseBtn = new JButton("Choisir source");
+			
+			srcDirChooseBtn = new JButton(new ImageIcon(getClass().getResource("/icones/repertoire.gif")));
+			srcDirChooseBtn.setToolTipText("Choisir source");
 			srcDirChooseBtn.addActionListener(al);
 
-			destDirChooseBtn = new JButton("Choisir destination");
+			destDirChooseBtn = new JButton(new ImageIcon(getClass().getResource("/icones/excel.jpg")));
+			destDirChooseBtn.setToolTipText("Choisir destination");
 			destDirChooseBtn.addActionListener(al);
 
 			srcDirTxtFld = new JTextField();
-			srcDirTxtFld.setPreferredSize(new Dimension(150, 30));
+			srcDirTxtFld.setPreferredSize(new Dimension(300, 30));
 			srcDirTxtFld.setEnabled(false);
+			srcDirTxtFld.setText(getModele().getSrcDir() != null ? getModele().getSrcDir().getAbsolutePath() : null);
 			
 			destDirTxtFld = new JTextField();
 			destDirTxtFld.setPreferredSize(srcDirTxtFld.getPreferredSize());
 			destDirTxtFld.setEnabled(false);
-
-			JPanel pnlBtnProcess = new JPanel(new GridBagLayout());
-			pnlBtnProcess.setOpaque(false);
-			pnlBtnProcess.add(processFDABtn, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+			destDirTxtFld.setText(getModele().getDestDir() != null ? getModele().getDestDir().getAbsolutePath() : null);
 			
+			
+			ctrlPnl = new JPanel(new GridBagLayout());
+			ctrlPnl.setOpaque(false);
+			
+			ctrlPnl.add(processFDABtn, new GridBagConstraints(0, 0, 21, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
+			
+			ctrlPnl.add(srcDirChooseBtn, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
+			ctrlPnl.add(srcDirTxtFld, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), 0, 0));
+			
+			ctrlPnl.add(destDirChooseBtn, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+			ctrlPnl.add(destDirTxtFld, new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
+			
+			progressBar = new JProgressBar(0, 100);
+			progressBar.setValue(0);
+			progressBar.setStringPainted(true);
+			progressBar.setPreferredSize(new Dimension(ctrlPnl.getPreferredSize().width, processFDABtn.getPreferredSize().height));
+			
+			progressPnl = new JPanel(new GridBagLayout());
+			progressPnl.setOpaque(false);
+			progressPnl.setVisible(false);
+//			pnlProgress.add(stopButton, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 0, 0, 0), 0, 0));
+			progressPnl.add(progressBar, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 0, 0), 0, 0));
+
 			ui = new JPanel(new GridBagLayout());
 			ui.setOpaque(false);
 			
-			ui.add(pnlBtnProcess, new GridBagConstraints(0, 0, 2, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-			
-			ui.add(srcDirChooseBtn, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-			ui.add(srcDirTxtFld, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-			
-			ui.add(destDirChooseBtn, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-			ui.add(destDirTxtFld, new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-			
+			ui.add(progressPnl, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 0), 0, 0));
+			ui.add(ctrlPnl, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		}
 		return ui;
 	}
 
-	private JFrame getParentFrame() {
-		Component p = ui;
-		while ( (p = p.getParent()) != null && !(p instanceof JFrame));
-		return((JFrame)p);
-	}
+//	private JFrame getParentFrame() {
+//		Component p = ui;
+//		while ( (p = p.getParent()) != null && !(p instanceof JFrame));
+//		return((JFrame)p);
+//	}
 
 	interface VFDAProcessorListener{
-		public void fireProcessFDA(File srcDir, File destDir) throws InvalidFormatException, IOException;
-		public void fireScrapingStopped();
+		public void fireProcessFDA() throws InvalidFormatException, IOException;
+
+		public void fireDestDirUpdated(File destDir);
+
+		public void fireSrcDirUpdated(File srcDir);
+	}
+	
+	
+	private void fireDestDirUpdated(File destDir) {
+		for (VFDAProcessorListener vueListener : vueListenerList) {
+			vueListener.fireDestDirUpdated(destDir);
+		}
+	}
+
+	private void fireSrcDirUpdated(File srcDir) {
+		for (VFDAProcessorListener vueListener : vueListenerList) {
+			vueListener.fireSrcDirUpdated(srcDir);
+		}
 	}
 	
 	private void fireProcessFDA() throws InvalidFormatException, IOException {
 		for (VFDAProcessorListener vueListener : vueListenerList) {
-			vueListener.fireProcessFDA(getSrcDirFileChooser().getSelectedFile(), getDestDirFileChooser().getSelectedFile());
+			vueListener.fireProcessFDA();
 		}
+	}
+
+	public void progressUpdated(int progress) {
+		progressBar.setValue(progress);
+	}
+
+	public void searchEnabled(boolean enabled) {
+		progressPnl.setVisible(!enabled);
+		ctrlPnl.setVisible(enabled);
 	}
 
 }
