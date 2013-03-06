@@ -46,7 +46,6 @@ public class FDAProcessor {
 			
 //			ficheDAductionIO.displayWorkbook(sheetTemplate);
 			
-			
 			int fileIndex = 0;
 			fireProgressUpdated(0);
 			
@@ -56,7 +55,6 @@ public class FDAProcessor {
 			File[] srcFileList = srcDir.listFiles(xLSXFileFilter);
 			
 			for (File srcFile : srcFileList) {
-				
 				
 				FicheDAduction fiche = ficheDAductionIO.readFiche(srcFile);
 				
@@ -147,7 +145,7 @@ public class FDAProcessor {
 	}
 
 	public void setDestDir(File destDir) {
-		getSettings().setSrcDir(destDir != null ? destDir.getAbsolutePath() : null);
+		getSettings().setDestDir(destDir != null ? destDir.getAbsolutePath() : null);
 	}
 
 	public void setSettings(FDAProcessUserSettings settings) {

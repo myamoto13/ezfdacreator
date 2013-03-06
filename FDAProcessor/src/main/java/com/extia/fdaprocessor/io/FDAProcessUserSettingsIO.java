@@ -1,5 +1,6 @@
 package com.extia.fdaprocessor.io;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class FDAProcessUserSettingsIO {
 			Properties prop = new Properties();
 			FileInputStream fs = null;
 			try {
-	    		fs = new FileInputStream(configFilePath);
+	    		fs = new FileInputStream(new File(configFilePath));
 	    		
 	    		prop.load(fs);
 	    		
@@ -68,10 +69,13 @@ public class FDAProcessUserSettingsIO {
 			Properties prop = new Properties();
 			FileOutputStream fo = null;
 			try{
-				fo = new FileOutputStream(configFilePath);
-				prop.setProperty("srcFilePath", settings.getSrcDir());
-				prop.setProperty("destFilePath", settings.getDestDir());
-				
+				fo = new FileOutputStream(new File(configFilePath));
+				if(settings.getSrcDir() != null){
+					prop.setProperty("srcFilePath", settings.getSrcDir());
+				}
+				if(settings.getDestDir() != null){
+					prop.setProperty("destFilePath", settings.getDestDir());
+				}
 				prop.store(fo, "comments");
 			} catch(IOException ex){
 				throw ex;

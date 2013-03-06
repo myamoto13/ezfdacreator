@@ -29,6 +29,7 @@ public class GUIFDAProcessor implements VFDAProcessorListener {
 	
 	private PropertyChangeListener pChangeListener;
 	private FDAProcessorTaskListener fDAProcessorTaskListener;
+	
 	public GUIFDAProcessor(){
 		MFDAProcessor modele = new MFDAProcessor();
 		VFDAProcessor vue = new VFDAProcessor();
