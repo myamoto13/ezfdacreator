@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
@@ -38,7 +39,7 @@ public class FDAProcessorLauncher {
 		GUIFDAProcessor guiFDAProcessor = new GUIFDAProcessor();
 		guiFDAProcessor.setFdaProcessor(fdaProcessor);
 
-		JPanel contentPane = new JPanel(new GridBagLayout()){
+		final JPanel contentPane = new JPanel(new GridBagLayout()){
 
 			private static final long serialVersionUID = 6749083721571321159L;
 
@@ -55,21 +56,27 @@ public class FDAProcessorLauncher {
 
 		contentPane.add(guiFDAProcessor.getUI(), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
-		JFrame frame = new JFrame();
-		frame.setSize(new Dimension(800, 600));
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().add(contentPane);
-		frame.setVisible(true);
-		frame.addWindowListener(new WindowAdapter() {
+		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run() {
+				JFrame frame = new JFrame();
+				frame.setSize(new Dimension(800, 600));
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.getContentPane().add(contentPane);
+				frame.setVisible(true);
+				frame.addWindowListener(new WindowAdapter() {
 
-			public void windowClosing(WindowEvent e) {
-				try {
-					settingsIO.writeScrappingSettings(fdaProcessor.getSettings());
-				} catch (IOException ex) {
-					logger.error(ex);
-				}
+					public void windowClosing(WindowEvent e) {
+						try {
+							settingsIO.writeScrappingSettings(fdaProcessor.getSettings());
+						} catch (IOException ex) {
+							logger.error(ex);
+						}
+					}
+				});		
 			}
 		});
+		
 	}
 
 
