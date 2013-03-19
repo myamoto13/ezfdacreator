@@ -1,13 +1,16 @@
-package com.extia.fdaprocessor.excel;
+package com.extia.fdaprocessor;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -19,7 +22,10 @@ import com.extia.fdaprocessor.io.FicheDAductionIO;
 
 public class FDAProcessor {
 	
+	static Logger logger = Logger.getLogger(FDAProcessor.class);
+
 	private List<FDAProcessProgressListener> fDAProcessProgressListenerList;
+	
 	private FDAProcessUserSettings settings;
 	
 	public FDAProcessor() {
@@ -38,7 +44,7 @@ public class FDAProcessor {
 		if(getSrcDir() != null && getDestDir() != null){
 			FileFilter xLSXFileFilter = new FileFilter(){
 				public boolean accept(File file) {
-					return file != null && file.getName().endsWith("xlsx");
+					return file != null && file.getName().endsWith("xlsx") || file.getName().endsWith("xls");
 				}
 			};
 			
@@ -61,18 +67,22 @@ public class FDAProcessor {
 				if(fiche != null){
 					//TODO build imageList
 					List<File> imageList = null;
-//					File fileFolder = new File("C:/Users/Michael Cortes/Desktop/FDA");
-//					File[] imageFileList = fileFolder.listFiles(new FilenameFilter() {
-//						public boolean accept(File file, String fileName) {
-//							boolean result = false;
-//							if(fileName != null){
-//								String lowerCaseFileName = fileName.toLowerCase();
-//								result = lowerCaseFileName != null && lowerCaseFileName.endsWith(".png") || lowerCaseFileName.endsWith(".jpg") || lowerCaseFileName.endsWith(".gif");
-//							}
-//							return result;
-//						}
-//					});
-					
+					File imgFolder = new File(srcFile.getParentFile(), fiche.getIdentifiantSite());
+					if(imgFolder.exists() && imgFolder.isDirectory()){
+						File[] imageFileList = imgFolder.listFiles(new FilenameFilter() {
+							public boolean accept(File file, String fileName) {
+								boolean result = false;
+								if(fileName != null){
+									String lowerCaseFileName = fileName.toLowerCase();
+									result = lowerCaseFileName != null && lowerCaseFileName.endsWith(".png") || lowerCaseFileName.endsWith(".jpg") || lowerCaseFileName.endsWith(".gif");
+								}
+								return result;
+							}
+						});
+						imageList = imageFileList != null ? Arrays.asList(imageFileList) : null;
+					}else{
+						logger.warn("Le répertoire " + imgFolder.getAbsolutePath() + " n'a pas été résolu : aucune photo ne sera importée pour " + fiche.getIdentifiantSite());
+					}
 					InputStream is =  getClass().getResourceAsStream("/template.xls");
 					Workbook workbookTemplate = WorkbookFactory.create(is);
 					Sheet sheetTemplate = workbookTemplate.getSheetAt(0);

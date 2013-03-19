@@ -10,9 +10,9 @@ import javax.swing.JPanel;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import com.extia.fdaprocessor.FDAProcessor;
 import com.extia.fdaprocessor.FDAProcessorLauncher;
-import com.extia.fdaprocessor.excel.FDAProcessor;
-import com.extia.fdaprocessor.excel.FDAProcessor.FDAProcessProgressListener;
+import com.extia.fdaprocessor.FDAProcessor.FDAProcessProgressListener;
 import com.extia.fdaprocessor.ui.fdaprocessor.FDAProcessorTask.FDAProcessorTaskListener;
 import com.extia.fdaprocessor.ui.fdaprocessor.VFDAProcessor.VFDAProcessorListener;
 

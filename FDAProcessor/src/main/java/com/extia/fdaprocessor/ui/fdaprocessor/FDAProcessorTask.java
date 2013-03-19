@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.swing.SwingWorker;
 
-import com.extia.fdaprocessor.excel.FDAProcessor;
-import com.extia.fdaprocessor.excel.FDAProcessor.FDAProcessProgressListener;
+import com.extia.fdaprocessor.FDAProcessor;
+import com.extia.fdaprocessor.FDAProcessor.FDAProcessProgressListener;
 
 class FDAProcessorTask extends SwingWorker<Void, Void> {
 	
