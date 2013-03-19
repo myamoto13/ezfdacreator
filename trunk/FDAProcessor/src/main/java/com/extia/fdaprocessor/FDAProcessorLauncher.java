@@ -19,7 +19,6 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
-import com.extia.fdaprocessor.excel.FDAProcessor;
 import com.extia.fdaprocessor.io.FDAProcessUserSettingsIO;
 import com.extia.fdaprocessor.ui.fdaprocessor.GUIFDAProcessor;
 

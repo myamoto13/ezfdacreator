@@ -80,7 +80,9 @@ public class FDAProcessUserSettingsIO {
 			} catch(IOException ex){
 				throw ex;
 			} finally{
-				fo.close();
+				if(fo != null){
+					fo.close();
+				}
 			}
 			
 		}

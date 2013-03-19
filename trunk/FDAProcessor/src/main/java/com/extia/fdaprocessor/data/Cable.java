@@ -4,16 +4,16 @@ public class Cable {
 	
 	private String equipement;
 	private String slot;
-	private String port;
+	private Integer port;
 	private String positionAuNRO;
 	private String cableDeDistrib;
 	private String couleurTube;
-	private String fibre;
+	private Integer fibre;
 	private String couleurFibre;
 	private String splitter;
 	private String tray;
 	private String couleurFibre2;
-	private String fibre2;
+	private Integer fibre2;
 	private String couleurTube2;
 	private String cableRaccordement;
 	
@@ -29,10 +29,10 @@ public class Cable {
 	public void setSlot(String slot) {
 		this.slot = slot;
 	}
-	public String getPort() {
+	public Integer getPort() {
 		return port;
 	}
-	public void setPort(String port) {
+	public void setPort(Integer port) {
 		this.port = port;
 	}
 	public String getPositionAuNRO() {
@@ -52,12 +52,6 @@ public class Cable {
 	}
 	public void setCouleurTube(String couleurTube) {
 		this.couleurTube = couleurTube;
-	}
-	public String getFibre() {
-		return fibre;
-	}
-	public void setFibre(String fibre) {
-		this.fibre = fibre;
 	}
 	public String getCouleurFibre() {
 		return couleurFibre;
@@ -84,12 +78,6 @@ public class Cable {
 	public void setCouleurFibre2(String couleurFibre2) {
 		this.couleurFibre2 = couleurFibre2;
 	}
-	public String getFibre2() {
-		return fibre2;
-	}
-	public void setFibre2(String fibre2) {
-		this.fibre2 = fibre2;
-	}
 	public String getCouleurTube2() {
 		return couleurTube2;
 	}
@@ -102,7 +90,18 @@ public class Cable {
 	public void setCableRaccordement(String cableRaccordement) {
 		this.cableRaccordement = cableRaccordement;
 	}
-	
+	public Integer getFibre() {
+		return fibre;
+	}
+	public void setFibre(Integer fibre) {
+		this.fibre = fibre;
+	}
+	public Integer getFibre2() {
+		return fibre2;
+	}
+	public void setFibre2(Integer fibre2) {
+		this.fibre2 = fibre2;
+	}
 	@Override
 	public String toString() {
 		return "Cable [equipement=" + equipement + ", slot=" + slot + ", port="
@@ -113,6 +112,21 @@ public class Cable {
 				+ ", couleurFibre2=" + couleurFibre2 + ", fibre2=" + fibre2
 				+ ", couleurTube2=" + couleurTube2 + ", cableRaccordement="
 				+ cableRaccordement + "]";
+	}
+	public String getEntreprise() {
+		return getEquipement() != null && !"".equals(getEquipement()) ? "SFR" : "BOUY";
+	}
+
+	public String getPortFormatted() {
+		return getPort() != null ? getPort().toString() : "";
+	}
+	
+	public String getFibreFormatted() {
+		return getFibre() != null ? getFibre().toString() : "";
+	}
+
+	public String getFibre2Formatted() {
+		return getFibre2() != null ? getFibre2().toString() : "";
 	}
 	
 }

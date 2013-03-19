@@ -1,27 +1,45 @@
 package com.extia.fdaprocessor.io;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.extia.fdaprocessor.data.Cable;
 import com.extia.fdaprocessor.data.FicheDAduction;
 import com.extia.fdaprocessor.data.Jaretiere;
 
 public class FicheDAductionIO {
+
+	static Logger logger = Logger.getLogger(FicheDAductionIO.class);
 
 	public FicheDAduction readFiche(File fdaFile) throws InvalidFormatException, IOException {
 		FicheDAduction result = null;
@@ -43,27 +61,47 @@ public class FicheDAductionIO {
 
 					String equipement = getCellValue(indexRow, 1, sheet);
 					String slot = getCellValue(indexRow, 2, sheet);
-					String port = getCellValue(indexRow, 3, sheet);
+					String portStr = getCellValue(indexRow, 3, sheet);
 					String positionAuNRO = getCellValue(indexRow, 4, sheet);
 					String cableDeDistrib = getCellValue(indexRow, 5, sheet);
 					String couleurTube = getCellValue(indexRow, 6, sheet);
-					String fibre = getCellValue(indexRow, 7, sheet);
+					String fibreStr = getCellValue(indexRow, 7, sheet);
 					String couleurFibre = getCellValue(indexRow, 8, sheet);
 					String splitter = getCellValue(indexRow, 9, sheet);
 					String tray = getCellValue(indexRow, 10, sheet);
 					String couleurFibre2 = getCellValue(indexRow, 11, sheet);
-					String fibre2 = getCellValue(indexRow, 12, sheet);
+					String fibre2Str = getCellValue(indexRow, 12, sheet);
 					String couleurTube2 = getCellValue(indexRow, 13, sheet);
 					String cableRaccordement = getCellValue(indexRow, 14, sheet);
 
-					if (!isValid(new String[] { equipement, slot, port,
-							positionAuNRO, cableDeDistrib, couleurTube, fibre,
+					if (!isValid(new String[] { equipement, slot, portStr,
+							positionAuNRO, cableDeDistrib, couleurTube, fibreStr,
 							couleurFibre, splitter, tray, couleurFibre2,
-							fibre2, couleurTube2, cableRaccordement })) {
+							fibre2Str, couleurTube2, cableRaccordement })) {
 						break;
 					}
-					Cable cable = new Cable();
+					Integer port = null;
+					try{
+						port = parseInt(portStr);
+					}catch(Exception ex){
+						logger.error("Format de port erroné pour " + result.getIdentifiantSite() + ".\n" + ex.getMessage(), ex);
+					}
+					
+					Integer fibre = null;
+					try{
+						fibre = parseInt(fibreStr);
+					}catch(Exception ex){
+						logger.error("Format de fibre erroné pour " + result.getIdentifiantSite() + ".\n" + ex.getMessage(), ex);
+					}
 
+					Integer fibre2 = null;
+					try{
+						fibre2 = parseInt(fibre2Str);
+					}catch(Exception ex){
+						logger.error("Format de fibre2 erroné pour " + result.getIdentifiantSite() + ".\n" + ex.getMessage(), ex);
+					}
+
+					Cable cable = new Cable();
 					cable.setEquipement(equipement);
 					cable.setSlot(slot);
 					cable.setPort(port);
@@ -149,6 +187,15 @@ public class FicheDAductionIO {
 		return result;
 	}
 
+	private Integer parseInt(String portStr) {
+		Integer result = null;
+
+		Double portDouble = Double.parseDouble(portStr);
+		result = portDouble != null ? portDouble.intValue() : null;
+
+		return result;
+	}
+
 	public void writeFiche(FicheDAduction fiche, Sheet sheet, List<File> imageFileList) throws IOException {
 		if (fiche != null && sheet != null) {
 
@@ -177,27 +224,55 @@ public class FicheDAductionIO {
 
 			int indexCable = 10;
 			for (Cable cable : fiche.getCableList()) {
+				setCellValue(cable.getEntreprise(), indexCable, 0, sheet);
 
 				setCellValue(cable.getEquipement(), indexCable, 1, sheet);
 				setCellValue(cable.getSlot(), indexCable, 2, sheet);
-				setCellValue(cable.getPort(), indexCable, 3, sheet);
+				setCellValue(cable.getPortFormatted(), indexCable, 3, sheet);
 
 				setCellValue(cable.getPositionAuNRO(), indexCable, 5, sheet);
 				setCellValue(cable.getCableDeDistrib(), indexCable, 11, sheet);
 				setCellValue(cable.getCouleurTube(), indexCable, 12, sheet);
-				setCellValue(cable.getFibre(), indexCable, 13, sheet);
+				setCellValue(cable.getFibreFormatted(), indexCable, 13, sheet);
 				setCellValue(cable.getCouleurFibre(), indexCable, 14, sheet);
 				setCellValue(cable.getSplitter(), indexCable, 15, sheet);
 				setCellValue(cable.getTray(), indexCable, 16, sheet);
 				setCellValue(cable.getCouleurFibre2(), indexCable, 17, sheet);
-				setCellValue(cable.getFibre2(), indexCable, 18, sheet);
+				setCellValue(cable.getFibre2Formatted(), indexCable, 18, sheet);
 				setCellValue(cable.getCouleurTube2(), indexCable, 19, sheet);
 				setCellValue(cable.getCableRaccordement(), indexCable, 20, sheet);
 				indexCable++;
 			}
 
-			if (indexRowIntituleJaretBPI >= 0
-					&& indexRowIntituleJaretBPI + 2 <= sheet.getLastRowNum()) {
+			List<CellRangeAddress> cellRangeList = new ArrayList<CellRangeAddress>();
+			
+			int entrepriseColIndex = 0;
+			int previousIndex = 10;
+			
+			String previousVal = getCellValue(previousIndex, entrepriseColIndex, sheet);
+			
+			int maxIndexCable = 13;
+
+			for (indexCable = previousIndex + 1; indexCable <= maxIndexCable; indexCable ++) {
+				
+				String newVal = getCellValue(indexCable, entrepriseColIndex, sheet);
+				
+				if(indexCable == maxIndexCable){
+					cellRangeList.add(new CellRangeAddress(previousIndex, indexCable, entrepriseColIndex, entrepriseColIndex));
+				}else if(previousVal == null || !previousVal.equals(newVal)){
+					if(previousIndex != indexCable){
+						cellRangeList.add(new CellRangeAddress(previousIndex, indexCable - 1, entrepriseColIndex, entrepriseColIndex));
+						previousVal = newVal;
+						previousIndex = indexCable;
+					}
+				}
+
+			}
+			for (CellRangeAddress cellRange : cellRangeList) {
+				sheet.addMergedRegion(cellRange);
+			}
+			
+			if (indexRowIntituleJaretBPI >= 0 && indexRowIntituleJaretBPI + 2 <= sheet.getLastRowNum()) {
 				int indexRowJaretBPI = indexRowIntituleJaretBPI + 2;
 				for (Jaretiere jaretiere : fiche.getJaretiereBPIList()) {
 
@@ -225,17 +300,17 @@ public class FicheDAductionIO {
 					indexRowJaretNRO++;
 				}
 			}
+			
+			if (imageFileList != null) {
+				Workbook workbook = sheet.getWorkbook();
+				if (workbook instanceof HSSFWorkbook) {
+					int rowIndex = 0;
+					for (File imgFile : imageFileList) {
+						addImage(((HSSFWorkbook) workbook).getSheetAt(1), imgFile, rowIndex++);
+					}
 
-//			if (imageFileList != null) {
-//				Workbook workbook = sheet.getWorkbook();
-//				if (workbook instanceof HSSFWorkbook) {
-//					int rowIndex = 0;
-//					for (File imgFile : imageFileList) {
-//						addImage(((HSSFWorkbook) workbook).getSheetAt(1), imgFile, rowIndex++);
-//					}
-//
-//				}
-//			}
+				}
+			}
 		}
 	}
 
@@ -324,77 +399,80 @@ public class FicheDAductionIO {
 		return result;
 	}
 
-//	public void addImage(HSSFSheet sheet, File imageFile, int rowIndex) throws IOException {
-//		// create a new workbook
-//		if (sheet != null) {
-//			// add picture data to this workbook.
-//			InputStream is = new FileInputStream(imageFile);
-//
-//			byte[] bytes = IOUtils.toByteArray(is);
-//			int pictureIdx = sheet.getWorkbook().addPicture(bytes,
-//					Workbook.PICTURE_TYPE_JPEG);
-//			is.close();
-//
-//			CreationHelper helper = sheet.getWorkbook().getCreationHelper();
-//
-//			// Create the drawing patriarch. This is the top level container for
-//			// all shapes.
-//			if (sheet.getDrawingPatriarch() == null) {
-//				sheet.createDrawingPatriarch();
-//			}
-//
-//			Drawing drawing = sheet.getDrawingPatriarch();
-//
-//			// add a picture shape
-//			ClientAnchor anchor = helper.createClientAnchor();
-//			// set top-left corner of the picture,
-//			// subsequent call of Picture#resize() will operate relative to it
-//			anchor.setCol1(0);
-//			anchor.setRow1(rowIndex);
-//
-//			setCellValue("" + rowIndex, rowIndex, 0, sheet);
-//
-//			is = new FileInputStream(imageFile);
-//			BufferedImage img = ImageIO.read(is);
-//			is.close();
-//			int height = img.getHeight();
-//
-//			HSSFRow row = sheet.getRow(rowIndex);
-//			if (row == null) {
-//				row = sheet.createRow(rowIndex);
-//			}
-//			row.setHeightInPoints(1 + height * 0.75F);
-//
-//			Picture pict = drawing.createPicture(anchor, pictureIdx);
-//
-//			// auto-size picture relative to its top-left corner
-//			pict.resize();
-//
-//			System.out.println(imageFile);
-//			System.out.println("x : " + pict.getPreferredSize().getDx1() + "  "
-//					+ pict.getPreferredSize().getDx2());
-//			System.out.println("y : " + pict.getPreferredSize().getDy1() + "  "
-//					+ pict.getPreferredSize().getDy2());
-//
-//		}
-//	}
+		public void addImage(HSSFSheet sheet, File imageFile, int rowIndex) throws IOException {
+			if (sheet != null) {
+				// add picture data to this workbook.
+				InputStream is = new FileInputStream(imageFile);
+	
+				byte[] bytes = IOUtils.toByteArray(is);
+				int pictureIdx = sheet.getWorkbook().addPicture(bytes,
+						Workbook.PICTURE_TYPE_JPEG);
+				is.close();
+	
+				CreationHelper helper = sheet.getWorkbook().getCreationHelper();
+	
+				// Create the drawing patriarch. This is the top level container for
+				// all shapes.
+				if (sheet.getDrawingPatriarch() == null) {
+					sheet.createDrawingPatriarch();
+				}
+	
+				Drawing drawing = sheet.getDrawingPatriarch();
+	
+				// add a picture shape
+				ClientAnchor anchor = helper.createClientAnchor();
+				// set top-left corner of the picture,
+				// subsequent call of Picture#resize() will operate relative to it
+				anchor.setCol1(0);
+				anchor.setRow1(rowIndex);
+	
+				setCellValue("" + rowIndex, rowIndex, 0, sheet);
+	
+				is = new FileInputStream(imageFile);
+				BufferedImage img = ImageIO.read(is);
+				is.close();
+				int height = img.getHeight();
+	
+				HSSFRow row = sheet.getRow(rowIndex);
+				if (row == null) {
+					row = sheet.createRow(rowIndex);
+				}
+				row.setHeightInPoints(1 + height * 0.75F);
+	
+				Picture pict = drawing.createPicture(anchor, pictureIdx);
+	
+				// auto-size picture relative to its top-left corner
+				pict.resize();
+				
+				if(!imageFile.getName().endsWith("gif")){
+					logger.warn("Le format de l'image " + imageFile.getAbsolutePath() + " n'étant pas 'GIF', la taille et le positionnement ne sont pas correctement gérées.");
+				}
+				
+//				System.out.println(imageFile);
+//				System.out.println("x : " + pict.getPreferredSize().getDx1() + "  "
+//						+ pict.getPreferredSize().getDx2());
+//				System.out.println("y : " + pict.getPreferredSize().getDy1() + "  "
+//						+ pict.getPreferredSize().getDy2());
+	
+			}
+		}
 
-//	private void displayWorkbook(Sheet sheet) {
-//		for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
-//			Row row = sheet.getRow(indexRow);
-//			if (row != null) {
-//				for (int indexCol = 0; indexCol < row.getLastCellNum(); indexCol++) {
-//					Cell cell = row.getCell(indexCol);
-//					if (cell != null) {
-//						String cellVal = getCellValue(cell);
-//
-//						if (cellVal != null && !"".equals(cellVal)) {
-//							System.out.println("(" + indexRow + ", " + indexCol
-//									+ ") => " + cellVal);
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
+	//	private void displayWorkbook(Sheet sheet) {
+	//		for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
+	//			Row row = sheet.getRow(indexRow);
+	//			if (row != null) {
+	//				for (int indexCol = 0; indexCol < row.getLastCellNum(); indexCol++) {
+	//					Cell cell = row.getCell(indexCol);
+	//					if (cell != null) {
+	//						String cellVal = getCellValue(cell);
+	//
+	//						if (cellVal != null && !"".equals(cellVal)) {
+	//							System.out.println("(" + indexRow + ", " + indexCol
+	//									+ ") => " + cellVal);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
 }
