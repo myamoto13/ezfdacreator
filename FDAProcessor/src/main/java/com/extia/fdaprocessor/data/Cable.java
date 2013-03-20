@@ -1,7 +1,12 @@
 package com.extia.fdaprocessor.data;
 
+/**
+ * @author Michael Cortes
+ *
+ */
 public class Cable {
 	
+	private FicheAduction fiche;
 	private String equipement;
 	private String slot;
 	private Integer port;
@@ -102,19 +107,18 @@ public class Cable {
 	public void setFibre2(Integer fibre2) {
 		this.fibre2 = fibre2;
 	}
-	@Override
-	public String toString() {
-		return "Cable [equipement=" + equipement + ", slot=" + slot + ", port="
-				+ port + ", positionAuNRO=" + positionAuNRO
-				+ ", cableDeDistrib=" + cableDeDistrib + ", couleurTube="
-				+ couleurTube + ", fibre=" + fibre + ", couleurFibre="
-				+ couleurFibre + ", splitter=" + splitter + ", tray=" + tray
-				+ ", couleurFibre2=" + couleurFibre2 + ", fibre2=" + fibre2
-				+ ", couleurTube2=" + couleurTube2 + ", cableRaccordement="
-				+ cableRaccordement + "]";
+	public FicheAduction getFiche() {
+		return fiche;
 	}
+	public void setFiche(FicheAduction fiche) {
+		this.fiche = fiche;
+	}
+	public String getIdentifiantSite(){
+		return getFiche() != null ? getFiche().getIdentifiantSite() : null;
+	}
+	
 	public String getEntreprise() {
-		return getEquipement() != null && !"".equals(getEquipement()) ? "SFR" : "BOUY";
+		return getEquipement() != null && getEquipement().contains("fab") ? "SFR" : "BOUY";
 	}
 
 	public String getPortFormatted() {
@@ -128,5 +132,17 @@ public class Cable {
 	public String getFibre2Formatted() {
 		return getFibre2() != null ? getFibre2().toString() : "";
 	}
+	@Override
+	public String toString() {
+		return "Cable [fiche=" + fiche + ", equipement=" + equipement
+				+ ", slot=" + slot + ", port=" + port + ", positionAuNRO="
+				+ positionAuNRO + ", cableDeDistrib=" + cableDeDistrib
+				+ ", couleurTube=" + couleurTube + ", fibre=" + fibre
+				+ ", couleurFibre=" + couleurFibre + ", splitter=" + splitter
+				+ ", tray=" + tray + ", couleurFibre2=" + couleurFibre2
+				+ ", fibre2=" + fibre2 + ", couleurTube2=" + couleurTube2
+				+ ", cableRaccordement=" + cableRaccordement + "]";
+	}
+	
 	
 }

@@ -10,6 +10,8 @@ import com.extia.fdaprocessor.FDAProcessor.FDAProcessProgressListener;
 
 class FDAProcessorTask extends SwingWorker<Void, Void> {
 	
+	private FDARunner fdaRunner;
+	
     private FDAProcessor fDAProcessor;
     private List<FDAProcessorTaskListener> FDAProcessorTaskListenerList;
 	
@@ -29,9 +31,13 @@ class FDAProcessorTask extends SwingWorker<Void, Void> {
 		this.fDAProcessor = viadeoScraper;
 	}
     
-    public Void doInBackground() {
+    public void setFdaRunner(FDARunner fdaRunner) {
+		this.fdaRunner = fdaRunner;
+	}
+
+	public Void doInBackground() {
     	
-    	FDAProcessProgressListener scrapingProgressListener = new FDAProcessProgressListener(){
+    	FDAProcessProgressListener fdaProcessorProgressListener = new FDAProcessProgressListener(){
     		public void progressUpdated(int progress){
     			setProgress(progress);
     		}
@@ -40,12 +46,12 @@ class FDAProcessorTask extends SwingWorker<Void, Void> {
     	try{
     		setProgress(0);
     		fireStarting();
-    		fDAProcessor.addFDAProcessProgressListener(scrapingProgressListener);
-    		fDAProcessor.processFdas();
+    		fDAProcessor.addFDAProcessProgressListener(fdaProcessorProgressListener);
+    		fdaRunner.run(fDAProcessor);
     	}catch(Exception ex){
     		fireError(ex);
     	}finally{
-    		fDAProcessor.removeFDAProcessProgressListener(scrapingProgressListener);
+    		fDAProcessor.removeFDAProcessProgressListener(fdaProcessorProgressListener);
     	}
     	return null;
     }
@@ -82,6 +88,9 @@ class FDAProcessorTask extends SwingWorker<Void, Void> {
 		public void finished();
 		public void starting();
 	}
-
+	
+	public interface FDARunner {
+		void run(FDAProcessor fDAProcessor);
+	}
 	
 }

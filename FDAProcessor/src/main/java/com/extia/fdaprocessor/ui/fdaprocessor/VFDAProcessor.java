@@ -37,6 +37,7 @@ public class VFDAProcessor implements MViadeoScraperListener {
 	private JProgressBar progressBar;
 	
 	private JButton processFDABtn;
+	private JButton makeSyntheseBtn;
 	
 	private List<VFDAProcessorListener> vueListenerList;
 
@@ -85,6 +86,8 @@ public class VFDAProcessor implements MViadeoScraperListener {
 						}
 					}else if(e.getSource() == processFDABtn){
 						fireProcessFDA();
+					}else if(e.getSource() == makeSyntheseBtn){
+						fireMakeSyntheseFDA();
 					}
 				}catch(Exception ex){
 					ex.printStackTrace();
@@ -118,6 +121,10 @@ public class VFDAProcessor implements MViadeoScraperListener {
 			processFDABtn.setToolTipText("Générer FDA");
 			processFDABtn.addActionListener(al);
 			
+			makeSyntheseBtn = new JButton(new ImageIcon(getClass().getResource("/icones/tableau.jpg")));
+			makeSyntheseBtn.setToolTipText("Faire synthèse des FDA");
+			makeSyntheseBtn.addActionListener(al);
+			
 			
 			srcDirChooseBtn = new JButton(new ImageIcon(getClass().getResource("/icones/repertoire.gif")));
 			srcDirChooseBtn.setToolTipText("Choisir source");
@@ -137,11 +144,16 @@ public class VFDAProcessor implements MViadeoScraperListener {
 			destDirTxtFld.setEnabled(false);
 			destDirTxtFld.setText(getModele().getDestDir() != null ? getModele().getDestDir().getAbsolutePath() : null);
 			
+			JPanel cmdPnl = new JPanel(new GridBagLayout());
+			cmdPnl.setOpaque(false);
+			cmdPnl.add(processFDABtn, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
+			cmdPnl.add(makeSyntheseBtn, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), 0, 0));
+			
 			
 			ctrlPnl = new JPanel(new GridBagLayout());
 			ctrlPnl.setOpaque(false);
 			
-			ctrlPnl.add(processFDABtn, new GridBagConstraints(0, 0, 21, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
+			ctrlPnl.add(cmdPnl, new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
 			
 			ctrlPnl.add(srcDirChooseBtn, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
 			ctrlPnl.add(srcDirTxtFld, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), 0, 0));
@@ -181,12 +193,20 @@ public class VFDAProcessor implements MViadeoScraperListener {
 		public void fireDestDirUpdated(File destDir);
 
 		public void fireSrcDirUpdated(File srcDir);
+
+		public void fireMakeSyntheseFDA();
 	}
 	
 	
 	private void fireDestDirUpdated(File destDir) {
 		for (VFDAProcessorListener vueListener : vueListenerList) {
 			vueListener.fireDestDirUpdated(destDir);
+		}
+	}
+	
+	private void fireMakeSyntheseFDA() {
+		for (VFDAProcessorListener vueListener : vueListenerList) {
+			vueListener.fireMakeSyntheseFDA();
 		}
 	}
 

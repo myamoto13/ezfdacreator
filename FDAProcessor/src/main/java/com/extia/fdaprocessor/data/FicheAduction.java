@@ -8,7 +8,7 @@ import java.util.List;
  * @author Michael Cortes
  *
  */
-public class FicheDAduction {
+public class FicheAduction {
 	
 	private String identifiantSite;
 	private String description;
@@ -18,7 +18,7 @@ public class FicheDAduction {
 	private List<Jaretiere> jaretiereBPIList; //boitier Pied Immeuble
 	private List<Jaretiere> jaretiereNROList;// Noeud Racordement Optique
 
-	public FicheDAduction() {
+	public FicheAduction() {
 		cableList = new ArrayList<Cable>();
 		jaretiereBPIList = new ArrayList<Jaretiere>();
 		jaretiereNROList = new ArrayList<Jaretiere>();
