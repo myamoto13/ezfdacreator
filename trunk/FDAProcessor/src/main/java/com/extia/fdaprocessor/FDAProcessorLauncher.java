@@ -19,7 +19,9 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
+import com.extia.fdaprocessor.io.ExcelIO;
 import com.extia.fdaprocessor.io.FDAProcessUserSettingsIO;
+import com.extia.fdaprocessor.io.FicheAductionIO;
 import com.extia.fdaprocessor.ui.fdaprocessor.GUIFDAProcessor;
 
 public class FDAProcessorLauncher {
@@ -28,11 +30,14 @@ public class FDAProcessorLauncher {
 
 	public void launch(String configFilePath) throws Exception{
 
+		FicheAductionIO ficheIO = new FicheAductionIO();
+		ficheIO.setExcelIO(new ExcelIO());
 
 		final FDAProcessUserSettingsIO settingsIO = new FDAProcessUserSettingsIO();
 		settingsIO.setConfigFilePath(configFilePath);
 
 		final FDAProcessor fdaProcessor = new FDAProcessor();
+		fdaProcessor.setFicheIO(ficheIO);
 		fdaProcessor.setSettings(settingsIO.readScrappingSettings());
 
 		GUIFDAProcessor guiFDAProcessor = new GUIFDAProcessor();

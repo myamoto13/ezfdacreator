@@ -2,6 +2,7 @@ package com.extia.fdaprocessor.data;
 
 public class Jaretiere {
 
+	private FicheAduction fiche;
 	private String tenant;
 	private String aboutissant;
 	private String ref;
@@ -38,13 +39,21 @@ public class Jaretiere {
 	public void setCommentaires(String commentaires) {
 		this.commentaires = commentaires;
 	}
+	public FicheAduction getFiche() {
+		return fiche;
+	}
+	public void setFiche(FicheAduction fiche) {
+		this.fiche = fiche;
+	}
+	public String getIdentifiantSite() {
+		return getFiche() != null ? getFiche().getIdentifiantSite() : null;
+	}
+	
 	@Override
 	public String toString() {
 		return "Jaretiere [tenant=" + tenant + ", aboutissant=" + aboutissant
 				+ ", ref=" + ref + ", etat=" + etat + ", commentaires="
 				+ commentaires + "]";
 	}
-	
-	
 	
 }

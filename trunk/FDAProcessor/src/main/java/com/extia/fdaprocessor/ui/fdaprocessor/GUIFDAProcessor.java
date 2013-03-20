@@ -12,8 +12,8 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.extia.fdaprocessor.FDAProcessor;
 import com.extia.fdaprocessor.FDAProcessorLauncher;
-import com.extia.fdaprocessor.FDAProcessor.FDAProcessProgressListener;
 import com.extia.fdaprocessor.ui.fdaprocessor.FDAProcessorTask.FDAProcessorTaskListener;
+import com.extia.fdaprocessor.ui.fdaprocessor.FDAProcessorTask.FDARunner;
 import com.extia.fdaprocessor.ui.fdaprocessor.VFDAProcessor.VFDAProcessorListener;
 
 public class GUIFDAProcessor implements VFDAProcessorListener {
@@ -25,8 +25,6 @@ public class GUIFDAProcessor implements VFDAProcessorListener {
 	
 	private FDAProcessorTask fDAProcessorTask;
 
-	private FDAProcessProgressListener fDAProcessProgressListener;
-	
 	private PropertyChangeListener pChangeListener;
 	private FDAProcessorTaskListener fDAProcessorTaskListener;
 	
@@ -75,9 +73,21 @@ public class GUIFDAProcessor implements VFDAProcessorListener {
 	public void setfDAProcessorTask(FDAProcessorTask fDAProcessorTask) {
 		this.fDAProcessorTask = fDAProcessorTask;
 	}
-
-	public void fireProcessFDA() throws InvalidFormatException, IOException {
+	
+	public void fireMakeSyntheseFDA() {
+		runFdaProcessor(new FDARunner() {
+			public void run(FDAProcessor fDAProcessor) {
+				try {
+					fDAProcessor.makeSyntheseFdas();
+				} catch (Exception ex) {
+					logger.error(ex.getMessage(), ex);
+				}
+			}
+		});
 		
+	}
+
+	private void runFdaProcessor(FDARunner fdaRunner) {
 		//Instances of javax.swing.SwingWorker are not reusuable
 		if(getfDAProcessorTask() != null){
 			getfDAProcessorTask().removePropertyChangeListener(getPChangeListener());
@@ -87,9 +97,22 @@ public class GUIFDAProcessor implements VFDAProcessorListener {
 		FDAProcessorTask fDAProcessorTask = new FDAProcessorTask();
 		setfDAProcessorTask(fDAProcessorTask);
 		fDAProcessorTask.setFDAProcessor(getModele().getFdaProcessor());
+		fDAProcessorTask.setFdaRunner(fdaRunner);
 		fDAProcessorTask.addPropertyChangeListener(getPChangeListener());
 		getfDAProcessorTask().addFDAProcessorTaskListener(getFDAProcessorTaskListener());
-		fDAProcessorTask.execute();
+		fDAProcessorTask.execute();		
+	}
+
+	public void fireProcessFDA() throws InvalidFormatException, IOException {
+		runFdaProcessor(new FDARunner() {
+			public void run(FDAProcessor fDAProcessor) {
+				try {
+					fDAProcessor.processFdas();
+				} catch (Exception ex) {
+					logger.error(ex.getMessage(), ex);
+				}
+			}
+		});
 	}
 
 	private FDAProcessorTaskListener getFDAProcessorTaskListener() {
