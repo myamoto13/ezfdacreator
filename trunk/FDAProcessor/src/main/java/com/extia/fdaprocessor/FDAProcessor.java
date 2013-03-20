@@ -86,7 +86,6 @@ public class FDAProcessor {
 				
 				HSSFWorkbook workbook = new HSSFWorkbook();
 				
-				
 				List<Jaretiere> jaretiereBPIList = new ArrayList<Jaretiere>();
 				for (FicheAduction ficheAduction : ficheList) {
 					jaretiereBPIList.addAll(ficheAduction.getJaretiereBPIList());
@@ -172,7 +171,8 @@ public class FDAProcessor {
 
 	private void updateProgress(int currentProgress) {
 		setProgressCurrent(currentProgress);
-		fireProgressUpdated(Math.round(((float)(getProgressCurrent()) / (float)getProgressTotal()) * 100));		
+		int progress = Math.round(((float)(getProgressCurrent()) / (float)getProgressTotal()) * 100);
+		fireProgressUpdated(progress);		
 	}
 	
 	private void finishProgress() {
@@ -309,6 +309,8 @@ public class FDAProcessor {
 		List<FicheAduction> result = null;
 
 		if(getSrcDir() != null && getDestDir() != null){
+			updateProgress(0);
+			
 			FileFilter xLSXFileFilter = new FileFilter(){
 				public boolean accept(File file) {
 					return file != null && file.getName().endsWith("xlsx") || file.getName().endsWith("xls");
@@ -318,11 +320,11 @@ public class FDAProcessor {
 			FicheAductionIO ficheDAductionIO = getFicheIO();
 			//			ficheDAductionIO.displayWorkbook(sheetTemplate);
 
-			fireProgressUpdated(0);
-
 			File srcDir = getSrcDir();
 
 			File[] srcFileList = srcDir.listFiles(xLSXFileFilter);
+			
+			setProgressTotal(srcFileList.length);
 			
 			result = new ArrayList<FicheAduction>();
 			
@@ -333,7 +335,9 @@ public class FDAProcessor {
 				if(fiche != null){
 					result.add(fiche);
 				}
+				incrProgress();
 			}
+			finishProgress();
 		}
 		return result;
 	}
