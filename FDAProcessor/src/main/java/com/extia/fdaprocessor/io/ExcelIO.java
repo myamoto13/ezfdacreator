@@ -75,8 +75,7 @@ public class ExcelIO {
 				break;
 			case Cell.CELL_TYPE_NUMERIC:
 				if (HSSFDateUtil.isCellDateFormatted(cell)) {
-					Date date = HSSFDateUtil.getJavaDate(cValue
-							.getNumberValue());
+					Date date = HSSFDateUtil.getJavaDate(cValue.getNumberValue());
 					String dateFmt = cell.getCellStyle().getDataFormatString();
 					result = new SimpleDateFormat("dd/mm/YYYY").format(date);
 					// result = date.toString() + "  (" + dateFmt + ") ==> " +
@@ -89,8 +88,14 @@ public class ExcelIO {
 				result = "" + cell.getErrorCellValue();
 				break;
 			case Cell.CELL_TYPE_FORMULA:
-				result = "" + cell.getStringCellValue() + "("
-						+ cell.getCellFormula() + ")";
+				switch(cell.getCachedFormulaResultType()) {
+					case Cell.CELL_TYPE_NUMERIC:
+						result = "" + cell.getNumericCellValue();
+						break;
+					case Cell.CELL_TYPE_STRING:
+						result = "" + cell.getStringCellValue();
+						break;
+				}
 				break;
 			case Cell.CELL_TYPE_BLANK:
 			case Cell.CELL_TYPE_STRING:

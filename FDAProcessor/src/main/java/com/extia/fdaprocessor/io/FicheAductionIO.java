@@ -63,12 +63,12 @@ public class FicheAductionIO {
 
 			if (sheet != null) {
 				
-				String identifiantSite = FilenameUtils.removeExtension(fdaFile.getName());
+				String fileName = FilenameUtils.removeExtension(fdaFile.getName());
 				
 				if(sheet.getRow(8).getLastCellNum() > 20){
-					result = readProcessedFDASheet(sheet, identifiantSite);
+					result = readProcessedFDASheet(sheet, fileName);
 				}else{
-					result = readRawFDASheet(sheet, identifiantSite);
+					result = readRawFDASheet(sheet, fileName);
 				}
 
 			}
@@ -99,6 +99,10 @@ public class FicheAductionIO {
 			result = new FicheAduction();
 
 			result.setIdentifiantSite(getCellValue(8, 21, sheet));
+			if(result.getIdentifiantSite() == null || result.getIdentifiantSite().equals("")){
+				result.setIdentifiantSite(fileName);
+			}
+			
 			result.setDescription(getCellValue(0, 0, sheet));
 			result.setDescDerivation(getCellValue(8, 11, sheet));
 
@@ -213,13 +217,13 @@ public class FicheAductionIO {
 		return result;
 	}
 
-	private FicheAduction readRawFDASheet(Sheet sheet, String identifileName) {
+	private FicheAduction readRawFDASheet(Sheet sheet, String fileName) {
 		FicheAduction result = null;
 
 		if(sheet != null){
 			result = new FicheAduction();
 
-			result.setIdentifiantSite(identifileName);
+			result.setIdentifiantSite(fileName);
 			result.setDescription(getCellValue(0, 0, sheet));
 			result.setDescDerivation(getCellValue(8, 5, sheet));
 
