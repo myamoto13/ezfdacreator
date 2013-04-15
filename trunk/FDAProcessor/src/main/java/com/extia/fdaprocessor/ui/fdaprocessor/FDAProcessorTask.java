@@ -57,7 +57,6 @@ class FDAProcessorTask extends SwingWorker<Void, Void> {
     }
     
 	public void done() {
-//    	fDAProcessor.setInterruptFlag(false);
 		fireFinished();
     }
     
@@ -78,10 +77,6 @@ class FDAProcessorTask extends SwingWorker<Void, Void> {
 			scrapTaskListener.starting();
 		}		
 	}
-	
-//	public void cancelScraping(){
-//    	viadeoScraper.setInteruptFlag(true);
-//    }
 	
 	interface FDAProcessorTaskListener{
 		public void error(Exception ex);
