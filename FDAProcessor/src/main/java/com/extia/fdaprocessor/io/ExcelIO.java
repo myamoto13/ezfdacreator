@@ -76,10 +76,7 @@ public class ExcelIO {
 			case Cell.CELL_TYPE_NUMERIC:
 				if (HSSFDateUtil.isCellDateFormatted(cell)) {
 					Date date = HSSFDateUtil.getJavaDate(cValue.getNumberValue());
-					String dateFmt = cell.getCellStyle().getDataFormatString();
 					result = new SimpleDateFormat("dd/mm/YYYY").format(date);
-					// result = date.toString() + "  (" + dateFmt + ") ==> " +
-					// (new SimpleDateFormat(dateFmt).format(date));
 				} else {
 					result = "" + cell.getNumericCellValue();
 				}

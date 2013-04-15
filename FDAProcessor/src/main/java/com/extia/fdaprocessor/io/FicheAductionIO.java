@@ -548,31 +548,7 @@ public class FicheAductionIO {
 					logger.warn("Le format de l'image " + imageFile.getAbsolutePath() + " n'étant pas 'GIF', la taille et le positionnement ne sont pas correctement gérées.");
 				}
 				
-//				System.out.println(imageFile);
-//				System.out.println("x : " + pict.getPreferredSize().getDx1() + "  "
-//						+ pict.getPreferredSize().getDx2());
-//				System.out.println("y : " + pict.getPreferredSize().getDy1() + "  "
-//						+ pict.getPreferredSize().getDy2());
-	
 			}
 		}
 
-	//	private void displayWorkbook(Sheet sheet) {
-	//		for (int indexRow = 0; indexRow < sheet.getLastRowNum(); indexRow++) {
-	//			Row row = sheet.getRow(indexRow);
-	//			if (row != null) {
-	//				for (int indexCol = 0; indexCol < row.getLastCellNum(); indexCol++) {
-	//					Cell cell = row.getCell(indexCol);
-	//					if (cell != null) {
-	//						String cellVal = getCellValue(cell);
-	//
-	//						if (cellVal != null && !"".equals(cellVal)) {
-	//							System.out.println("(" + indexRow + ", " + indexCol
-	//									+ ") => " + cellVal);
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
 }

@@ -169,7 +169,6 @@ public class VFDAProcessor implements MViadeoScraperListener {
 			progressPnl = new JPanel(new GridBagLayout());
 			progressPnl.setOpaque(false);
 			progressPnl.setVisible(false);
-//			pnlProgress.add(stopButton, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 0, 0, 0), 0, 0));
 			progressPnl.add(progressBar, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 0, 0), 0, 0));
 
 			ui = new JPanel(new GridBagLayout());
@@ -180,12 +179,6 @@ public class VFDAProcessor implements MViadeoScraperListener {
 		}
 		return ui;
 	}
-
-//	private JFrame getParentFrame() {
-//		Component p = ui;
-//		while ( (p = p.getParent()) != null && !(p instanceof JFrame));
-//		return((JFrame)p);
-//	}
 
 	interface VFDAProcessorListener{
 		public void fireProcessFDA() throws InvalidFormatException, IOException;
